@@ -18,7 +18,7 @@ function parseJSONError(response) {
 			//try to look for a message or exception message - fall back to statusText
 			const msg = _get(data, "message", _get(data, "exceptionMessage", response.statusText));
 
-			let error = new Error(response.statusText);
+			let error = new Error(msg);
 			error.response = response;
 
 			reject(error);
