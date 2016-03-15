@@ -1,6 +1,8 @@
 # Fetch Helpers
 
-> Response handlers and helpers to parse JSON and deal with HTTP errors when using the browser fetch API
+> Response handlers and helpers to parse JSON and deal with HTTP errors when using the [browser fetch API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API)
+
+[See here for a polyfill](https://github.com/github/fetch) if you are using the fetch API in a browser that doesn't support it yet.
 
 ## Install
 
