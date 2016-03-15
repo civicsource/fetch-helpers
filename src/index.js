@@ -13,7 +13,7 @@ function parseJSONError(response) {
 		//try to parse the JSON before erroring
 		response.json().then(data => {
 			//replace the existing body with the JSON response
-			response.body = data;
+			response.jsonBody = data;
 
 			//try to look for a message or exception message - fall back to statusText
 			const msg = _get(data, "message", _get(data, "exceptionMessage", response.statusText));

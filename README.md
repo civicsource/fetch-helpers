@@ -32,7 +32,7 @@ fetch("/data", {
 .catch(err => {
 	console.log(err.message); //Invalid Arguments. Try again.
 	console.log(err.response.statusText); //Bad Request
-	console.log(err.response.body); //{ "message": "Invalid arguments. Try again.", "someOtherThing": 42 }
+	console.log(err.response.jsonBody); //{ "message": "Invalid arguments. Try again.", "someOtherThing": 42 }
 });
 ```
 
