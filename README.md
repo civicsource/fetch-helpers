@@ -36,7 +36,7 @@ fetch("/data", {
 });
 ```
 
-It will try to look for a `message` field first, and then an `exceptionMessage` falling back to the `statusText` if neither one exist.
+It will try to look for a `message` field first, and then an `exceptionMessage` falling back to the `statusText` if neither one exist or if the response body is not JSON.
 
 ### `parseJSON(response)`
 
