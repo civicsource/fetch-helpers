@@ -1,4 +1,4 @@
-import _get from "lodash.get";
+import { get } from "lodash";
 
 export function checkStatus(response) {
 	if (response.status >= 200 && response.status < 300) {
@@ -16,7 +16,7 @@ function parseJSONError(response) {
 			response.jsonBody = data;
 
 			//try to look for a message or exception message - fall back to statusText
-			const msg = _get(data, "message", _get(data, "exceptionMessage", response.statusText));
+			const msg = get(data, "message", get(data, "exceptionMessage", response.statusText));
 
 			let error = new Error(msg);
 			error.response = response;
