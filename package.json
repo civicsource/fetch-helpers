@@ -1,12 +1,13 @@
 {
   "name": "fetch-helpers",
-  "version": "1.0.3",
+  "version": "1.1.0",
   "description": "Response handlers and helpers to parse JSON and deal with HTTP errors when using the browser fetch API.",
   "keywords": [
     "fetch",
     "checkStatus",
     "parseJSON",
-    "parseJSONError"
+    "parseJSONError",
+    "batch"
   ],
   "author": "Chad Lee",
   "license": "MIT",

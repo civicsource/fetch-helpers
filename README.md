@@ -58,6 +58,48 @@ fetch("/data", {
 .then(json => console.log(json));
 ```
 
+### `batchFetch(keyName, performFetch, { maxBatchSize, timeout })`
+
+A utility to allow easily batching `fetch` requests. Calling code calls the function as if it will make a single request while, internally, it will wait a predetermined amount of time before actually making the request.
+
+```js
+import { batchFetch } from "fetch-helpers";
+
+const getItem = batchFetch("itemId", chunk => fetch(`http://example.com/api/items/${chunk.join(",")}/`, {
+	method: "GET"
+}));
+
+for (let i = 1; i <= 10; i++) {
+	getItem(i).then(item => console.log(`item with id ${item.itemId} retrieved from the server`));
+}
+```
+
+The above example will make one request to the URL `http://example.com/api/items/1,2,3,4,5,6,7,8,9,10/` but resolve all promises separately so that calling code is none-the-wiser that its requests have been batched into one. The `keyName` (in this case `itemId`) must be returned from the server in the results as that is how `batchFetch` matches what promises to resolve/reject.
+
+The default batch size is 10 and the default timeout is 100ms. Both can be overridden:
+
+```js
+const getItem = batchFetch("itemId", chunk => fetch(`http://example.com/api/items/${chunk.join(",")}/`, {
+	method: "GET"
+}), {
+	maxBatchSize: 30,
+	timeout = 300
+});
+```
+
+Any extra parameters passed to the resulting function will be passed to the `performFetch` function:
+
+```js
+const getItem = batchFetch("itemId", (chunk, method) => fetch(`http://example.com/api/items/${chunk.join(",")}/`, {
+	method: method
+}));
+
+getItem(42, "GET");
+getItem(13, "GET");
+getItem(69, "GET");
+getItem(420, "GET"); // the last one wins (as far as the extra params passed to performFetch)
+```
+
 ## Build Locally
 
 After cloning this repo, run:
