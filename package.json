@@ -1,6 +1,6 @@
 {
   "name": "fetch-helpers",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "description": "Response handlers and helpers to parse JSON and deal with HTTP errors when using the browser fetch API.",
   "keywords": [
     "fetch",
@@ -12,10 +12,13 @@
   "author": "Chad Lee",
   "license": "MIT",
   "main": "lib/index.js",
+  "module": "es/index.js",
   "scripts": {
-    "compile": "babel -d lib src",
+    "compile-cjs": "rimraf lib && cross-env BABEL_ENV=cjs babel src -d lib",
+    "compile-es": "rimraf es && babel src -d es",
+    "compile": "npm run compile-cjs && npm run compile-es",
     "lint": "eslint src",
-    "test": "mocha --compilers js:babel-core/register --recursive --require babel-polyfill",
+    "test": "cross-env BABEL_ENV=cjs mocha --compilers js:babel-core/register --recursive --require babel-polyfill",
     "prepublish": "npm run lint && npm test && npm run compile"
   },
   "repository": {
@@ -34,8 +37,10 @@
     "babel-preset-es2015": "6.x",
     "babel-preset-stage-2": "6.x",
     "chai": "3.x",
+    "cross-env": "3.x",
     "eslint": "3.x",
     "eslint-config-civicsource": "2.x",
-    "mocha": "3.x"
+    "mocha": "3.x",
+    "rimraf": "2.x"
   }
 }

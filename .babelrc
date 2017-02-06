@@ -1,4 +1,15 @@
 {
-	"presets": ["es2015", "stage-2"],
-	"plugins": ["lodash", "transform-export-extensions"]
+	"presets": [
+		["es2015", { "modules": false }],
+		"stage-2"
+	],
+	"plugins": [
+		"lodash",
+		"transform-export-extensions"
+	],
+	"env": {
+		"cjs": {
+			"presets": ["es2015", "stage-2"]
+		}
+	}
 }
