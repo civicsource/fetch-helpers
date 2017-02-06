@@ -5,7 +5,7 @@ import parseJSON from "./parse-json";
 export default function batchFetch(keyName, performFetch, {
 	maxBatchSize = 10,
 	timeout = 100
-}) {
+} = {}) {
 	let queue = {};
 
 	const getDebounced = debounce((...extra) => {
@@ -24,16 +24,27 @@ export default function batchFetch(keyName, performFetch, {
 				thingsToFetch[key].resolve(item);
 				delete thingsToFetch[key];
 			});
+		}, err => {
+			forEach(chunk, key => {
+				thingsToFetch[key].reject(err);
+				delete thingsToFetch[key];
+			});
 		}));
 
 		// once they are all done (success or failure), reject any leftovers
-		Promise.all(allChunks).then(rejectLeftovers, rejectLeftovers);
+		Promise.all(allChunks).then(() => {
+			forEach(thingsToFetch, ({ reject }, key) => {
+				const err = new Error(`Could not find '${key}' in batched results.`);
 
-		function rejectLeftovers(err) {
-			forEach(thingsToFetch, ({ reject }) => {
+				// fake a 404 response to reject the leftovers with
+				err.response = {
+					status: 404,
+					statusText: "Not Found"
+				};
+
 				reject(err);
 			});
-		}
+		});
 	}, timeout);
 
 	return function getBatch(key, ...extra) {
