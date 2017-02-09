@@ -15,8 +15,8 @@ function parseJSONError(response) {
 			// replace the existing body with the JSON response
 			response.jsonBody = data;
 
-			// try to look for a message or exception message - fall back to statusText
-			const msg = get(data, "message", get(data, "exceptionMessage", response.statusText));
+			let msg = parseErrorMessageFromData(data);
+			if (!msg) msg = response.statusText;
 
 			let error = new Error(msg);
 			error.response = response;
@@ -30,4 +30,25 @@ function parseJSONError(response) {
 			reject(error);
 		});
 	});
+}
+
+function parseErrorMessageFromData(data) {
+	// if it is a .net exception, try to find the inner-most exception
+	let ex = data;
+	while (ex.innerException) {
+		const origEx = ex;
+		ex = ex.innerException;
+		ex.outerException = origEx;
+	}
+
+	// try to look for a message or exception message
+	let msg = get(ex, "exceptionMessage", get(ex, "message"));
+
+	while (!msg && ex.outerException) {
+		// go back up the tree looking for more messages
+		ex = ex.outerException;
+		msg = get(ex, "exceptionMessage", get(ex, "message"));
+	}
+
+	return msg;
 }
