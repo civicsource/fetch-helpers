@@ -73,6 +73,27 @@ describe("Parsing Responses", function() {
 			});
 		});
 
+		describe("with a pascal-cased error message", function() {
+			beforeEach(function () {
+				this.resolve({
+					status: 400,
+					statusText: "Bad Request",
+					json: () => new Promise(resolve => resolve({
+						Message: "shiitake mushrooms"
+					}))
+				});
+			});
+
+			shouldRejectWithError(400);
+
+			it("should parse the error message from the response", function (done) {
+				this.result.catch(err => {
+					expect(err.message).to.equal("shiitake mushrooms");
+					done();
+				});
+			});
+		});
+
 		describe("without an error message", function() {
 			beforeEach(function () {
 				this.resolve({
@@ -102,6 +123,30 @@ describe("Parsing Responses", function() {
 						exceptionMessage: "Cannot do the thing you wanted to do because of some important reason.",
 						exceptionType: "System.InvalidOperationException",
 						stackTrace: "bla bla bla"
+					}))
+				});
+			});
+
+			shouldRejectWithError(500);
+
+			it("should use the exception message as the error message", function (done) {
+				this.result.catch(err => {
+					expect(err.message).to.equal("Cannot do the thing you wanted to do because of some important reason.");
+					done();
+				});
+			});
+		});
+
+		describe("with a pascal-cased .net exception message", function() {
+			beforeEach(function () {
+				this.resolve({
+					status: 500,
+					statusText: "Server Error",
+					json: () => new Promise(resolve => resolve({
+						Message: "Invalid Operation",
+						ExceptionMessage: "Cannot do the thing you wanted to do because of some important reason.",
+						ExceptionType: "System.InvalidOperationException",
+						StackTrace: "bla bla bla"
 					}))
 				});
 			});

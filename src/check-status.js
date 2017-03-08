@@ -42,13 +42,17 @@ function parseErrorMessageFromData(data) {
 	}
 
 	// try to look for a message or exception message
-	let msg = get(ex, "exceptionMessage", get(ex, "message"));
+	let msg = getMessage(ex);
 
 	while (!msg && ex.outerException) {
 		// go back up the tree looking for more messages
 		ex = ex.outerException;
-		msg = get(ex, "exceptionMessage", get(ex, "message"));
+		msg = getMessage(ex);
 	}
 
 	return msg;
+}
+
+function getMessage(ex) {
+	return get(ex, "exceptionMessage", get(ex, "message", get(ex, "ExceptionMessage", get(ex, "Message"))));
 }
