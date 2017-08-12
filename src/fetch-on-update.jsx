@@ -10,6 +10,9 @@ export default function fetchOnUpdate(fn, ...keys) {
 			}
 
 			componentDidUpdate(prevProps) {
+				// if they didn't specify any keys, we effectively only run the fetch function once on init
+				if (keys.length < 1) return;
+
 				const params = mapParams(keys, this.props);
 				const prevParams = mapParams(keys, prevProps);
 
@@ -25,8 +28,6 @@ export default function fetchOnUpdate(fn, ...keys) {
 }
 
 function mapParams(paramKeys, params) {
-	if (paramKeys.length < 1) return params;
-
 	const result = {};
 
 	paramKeys.forEach(path => {

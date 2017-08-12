@@ -6,7 +6,7 @@ import { mount } from "enzyme";
 
 import { fetchOnUpdate } from "../src";
 
-describe("Fetching on component props update", function() {
+describe.only("Fetching on component props update", function() {
 	behavesLikeBrowser();
 
 	const NakedComponent = () => <span>Hello, world</span>;
@@ -34,8 +34,8 @@ describe("Fetching on component props update", function() {
 					this.wrapper.setProps({ hello: "world" });
 				});
 
-				it("should call the fetch function again", function() {
-					expect(this.callCount).to.equal(2);
+				it("should not call the fetch function again", function() {
+					expect(this.callCount).to.equal(1);
 				});
 			});
 		});
