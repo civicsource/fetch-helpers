@@ -21,6 +21,13 @@ export default function() {
 				global[property] = document.defaultView[property];
 			}
 		});
+
+		this.requests = [];
+
+		global.fetch = url =>
+			new Promise((resolve, reject) => {
+				this.requests.push({ url, resolve, reject });
+			});
 	});
 
 	afterEach(function() {

@@ -2,11 +2,19 @@ import React, { Component } from "react";
 import { get, set } from "lodash";
 import shallowEqual from "shallowequal";
 
+import checkStatus from "./check-status";
+import parseJSON from "./parse-json";
+
 export default function fetchOnUpdate(fn, ...keys) {
 	return DecoratedComponent =>
 		class FetchOnUpdateDecorator extends Component {
+			constructor(props) {
+				super(props);
+				this.state = {};
+			}
+
 			componentWillMount() {
-				fn(this.props);
+				this.doFetch();
 			}
 
 			componentDidUpdate(prevProps) {
@@ -17,12 +25,46 @@ export default function fetchOnUpdate(fn, ...keys) {
 				const prevParams = mapParams(keys, prevProps);
 
 				if (!shallowEqual(params, prevParams)) {
-					fn(this.props);
+					this.doFetch();
+				}
+			}
+
+			async doFetch() {
+				const result = fn(this.props);
+
+				if (result) {
+					const { url, key = "data", ...opts } = result;
+
+					// if they returned an object from the fetch function, let's do the fetch for them
+					// otherwise we assume they did the fetch themselves
+					this.setState(({ isLoaded }) => ({
+						isLoading: true,
+						isLoaded: !!isLoaded, // if this is first time we are fetching, need to set isLoaded to a bool
+						error: null
+					}));
+
+					try {
+						let response = await fetch(url, opts);
+
+						response = await checkStatus(response);
+						response = await parseJSON(response);
+
+						this.setState({
+							[key]: response,
+							isLoaded: true,
+							isLoading: false
+						});
+					} catch (ex) {
+						this.setState({
+							isLoading: false,
+							error: ex.message
+						});
+					}
 				}
 			}
 
 			render() {
-				return <DecoratedComponent {...this.props} />;
+				return <DecoratedComponent {...this.props} {...this.state} />;
 			}
 		};
 }
