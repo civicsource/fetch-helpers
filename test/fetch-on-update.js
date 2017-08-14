@@ -367,4 +367,33 @@ describe("Fetching on component props update", function() {
 			expect(this.renderedProps.bananas).to.have.lengthOf(2);
 		});
 	});
+
+	describe("when rendering a component without a fetch function with a data manipulation function", function() {
+		beforeEach(function(done) {
+			this.FetchingComponent = fetchOnUpdate(({ id }) => ({
+				url: `http://example.com/api/bananas/${id}`,
+				key: "bananas",
+				onData: bananas => bananas.map(str => str.replace(" banana", ""))
+			}))(this.NakedComponent);
+
+			this.wrapper = mount(<this.FetchingComponent id={4} />);
+
+			this.requests.pop().resolve({
+				status: 200,
+				statusText: "OK",
+				json: async () => ["ripe banana", "green banana"]
+			});
+
+			setTimeout(done, 10);
+		});
+
+		it("should manipulate the data before passing to the component", function() {
+			const { bananas } = this.renderedProps;
+
+			expect(bananas).to.be.ok;
+			expect(bananas).to.have.lengthOf(2);
+			expect(bananas).to.contain("ripe");
+			expect(bananas).to.contain("green");
+		});
+	});
 });

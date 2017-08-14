@@ -137,7 +137,20 @@ The second argument is the prop to monitor for changes and if that prop changes,
 
 #### Advanced Usage
 
-If your `fn` does not return an object describing how to fetch the data, it will assume that you are handling all that yourself. This is useful, for example, if you just want to trigger a redux action and retrieve loading statuses & such from the store:
+You can also pass a data manipulation function, `onData`, to alter the data returned from the server before passing it to the component:
+
+```js
+const UserProfileFetcher = fetchOnUpdate(({ username }) =>  ({
+	url: `http://example.com/api/${username}`,
+	key: "user",
+	onData: user => ({
+		...user,
+		from: "server"
+	})
+}), "username")(UserProfile);
+```
+
+If you need to completely override the builtin functionality, you can do that as well. If your `fn` does not return an object describing how to fetch the data, `fetchOnUpdate` will assume that you are handling all that yourself. This is useful, for example, if you just want to trigger a redux action and retrieve loading statuses & such from the store:
 
 ```js
 const UserProfileFetcher = fetchOnUpdate(({ username, fetchUser }) => {

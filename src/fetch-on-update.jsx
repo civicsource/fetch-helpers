@@ -33,7 +33,7 @@ export default function fetchOnUpdate(fn, ...keys) {
 				const result = fn(this.props);
 
 				if (result) {
-					const { url, key = "data", ...opts } = result;
+					const { url, key = "data", onData, ...opts } = result;
 
 					// if they returned an object from the fetch function, let's do the fetch for them
 					// otherwise we assume they did the fetch themselves
@@ -48,6 +48,10 @@ export default function fetchOnUpdate(fn, ...keys) {
 
 						response = await checkStatus(response);
 						response = await parseJSON(response);
+
+						if (onData) {
+							response = onData(response);
+						}
 
 						this.setState({
 							[key]: response,
