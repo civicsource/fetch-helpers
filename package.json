@@ -1,6 +1,6 @@
 {
   "name": "fetch-helpers",
-  "version": "1.4.0",
+  "version": "2.0.0",
   "description": "Response handlers and helpers to parse JSON and deal with HTTP errors when using the browser fetch API.",
   "keywords": [
     "fetch",
