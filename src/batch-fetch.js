@@ -16,25 +16,28 @@ export default function batchFetch(
 		const chunks = chunk(keys(thingsToFetch), maxBatchSize);
 
 		const allChunks = chunks.map(chunk =>
-			performFetch(chunk, ...extra).then(checkStatus).then(parseJSON).then(
-				items => {
-					if (chunk.length == 1) {
-						items = [items];
-					}
+			performFetch(chunk, ...extra)
+				.then(checkStatus)
+				.then(parseJSON)
+				.then(
+					items => {
+						if (chunk.length == 1) {
+							items = [items];
+						}
 
-					items.forEach(item => {
-						const key = get(item, keyName);
-						thingsToFetch[key].resolve(item);
-						delete thingsToFetch[key];
-					});
-				},
-				err => {
-					forEach(chunk, key => {
-						thingsToFetch[key].reject(err);
-						delete thingsToFetch[key];
-					});
-				}
-			)
+						items.forEach(item => {
+							const key = get(item, keyName);
+							thingsToFetch[key].resolve(item);
+							delete thingsToFetch[key];
+						});
+					},
+					err => {
+						forEach(chunk, key => {
+							thingsToFetch[key].reject(err);
+							delete thingsToFetch[key];
+						});
+					}
+				)
 		);
 
 		// once they are all done (success or failure), reject any leftovers
