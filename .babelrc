@@ -6,13 +6,7 @@
 	],
 	"env": {
 		"es": {
-			"presets": [["env", {
-				"targets": {
-				  "node": "current"
-				},
-				"modules": false,
-				"useBuiltIns": "usage"
-			}], "react"]
+			"presets": ["react"]
 		},
 		"cjs": {
 			"presets": [["env", {
