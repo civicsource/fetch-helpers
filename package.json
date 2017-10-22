@@ -1,6 +1,6 @@
 {
   "name": "fetch-helpers",
-  "version": "3.0.0",
+  "version": "0.0.0",
   "description": "Response handlers and helpers to parse JSON and deal with HTTP errors when using the browser fetch API.",
   "keywords": [
     "fetch",
@@ -18,8 +18,7 @@
     "compile-es": "rimraf es && cross-env BABEL_ENV=es babel src -d es",
     "compile": "npm run compile-cjs && npm run compile-es",
     "lint": "eslint src",
-    "test": "cross-env BABEL_ENV=cjs mocha --compilers js:babel-core/register --recursive --require babel-polyfill",
-    "prepublish": "npm run lint && npm test && npm run compile"
+    "test": "cross-env BABEL_ENV=cjs mocha --compilers js:babel-core/register --recursive --require babel-polyfill"
   },
   "repository": {
     "type": "git",
@@ -47,6 +46,7 @@
     "eslint": "4.x",
     "eslint-config-civicsource": "6.x",
     "jsdom": "^11.1.0",
+    "json-update": "^3.0.0",
     "mocha": "3.x",
     "react": "15.x",
     "react-dom": "15.x",
