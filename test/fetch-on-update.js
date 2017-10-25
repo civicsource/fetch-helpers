@@ -2,9 +2,12 @@ import { expect } from "chai";
 import behavesLikeBrowser from "./behaves-like-browser";
 
 import React from "react";
-import { mount } from "enzyme";
+import { configure, mount } from "enzyme";
+import Adapter from "enzyme-adapter-react-16";
 
 import { fetchOnUpdate } from "../src";
+
+configure({ adapter: new Adapter() });
 
 describe("Fetching on component props update", function() {
 	behavesLikeBrowser();

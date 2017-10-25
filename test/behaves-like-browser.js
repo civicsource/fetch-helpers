@@ -15,10 +15,10 @@ export default function() {
 			userAgent: "node.js"
 		};
 
-		Object.keys(document.defaultView).forEach(property => {
+		Object.keys(global.document.defaultView).forEach(property => {
 			if (typeof global[property] === "undefined") {
 				this.exposedProperties.push(property);
-				global[property] = document.defaultView[property];
+				global[property] = global.document.defaultView[property];
 			}
 		});
 

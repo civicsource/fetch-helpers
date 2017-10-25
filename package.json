@@ -14,11 +14,9 @@
   "main": "lib/index.js",
   "module": "es/index.js",
   "scripts": {
-    "compile-cjs": "rimraf lib && cross-env BABEL_ENV=cjs babel src -d lib",
-    "compile-es": "rimraf es && cross-env BABEL_ENV=es babel src -d es",
-    "compile": "npm run compile-cjs && npm run compile-es",
-    "lint": "eslint src",
-    "test": "cross-env BABEL_ENV=cjs mocha --compilers js:babel-core/register --recursive --require babel-polyfill"
+    "compile": "rimraf es lib && cross-env BABEL_ENV=es babel src -d es && cross-env BABEL_ENV=cjs babel src -d lib",
+    "lint": "eslint src test",
+    "test": "cross-env BABEL_ENV=cjs mocha --recursive --require babel-core/register --require babel-polyfill"
   },
   "repository": {
     "type": "git",
@@ -30,7 +28,7 @@
     "shallowequal": "1.x"
   },
   "peerDependencies": {
-    "react": ">= 15.x"
+    "react": ">= 15.x < 17"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
@@ -40,17 +38,18 @@
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "babel-preset-env": "^1.6.1",
     "babel-preset-react": "^6.24.1",
-    "chai": "4.x",
-    "cross-env": "5.x",
-    "enzyme": "^2.9.1",
-    "eslint": "4.x",
-    "eslint-config-civicsource": "6.x",
-    "jsdom": "^11.1.0",
+    "chai": "^4.1.2",
+    "cross-env": "^5.1.0",
+    "enzyme": "^3.1.0",
+    "enzyme-adapter-react-16": "^1.0.2",
+    "eslint": "^4.9.0",
+    "eslint-config-civicsource": "^8.0.0",
+    "jsdom": "^11.3.0",
     "json-update": "^3.0.0",
-    "mocha": "3.x",
-    "react": "15.x",
-    "react-dom": "15.x",
-    "react-test-renderer": "^15.6.1",
-    "rimraf": "2.x"
+    "mocha": "^4.0.1",
+    "react": "^16.0.0",
+    "react-dom": "^16.0.0",
+    "react-test-renderer": "^16.0.0",
+    "rimraf": "^2.6.2"
   }
 }
