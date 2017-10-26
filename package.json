@@ -16,7 +16,8 @@
   "scripts": {
     "compile": "rimraf es lib && cross-env BABEL_ENV=es babel src -d es && cross-env BABEL_ENV=node babel src -d lib",
     "lint": "eslint src test",
-    "test": "cross-env BABEL_ENV=node mocha --recursive --require babel-core/register --require babel-polyfill"
+    "test": "cross-env BABEL_ENV=node mocha --recursive --require babel-core/register --require babel-polyfill",
+    "test-teamcity": "yarn test --reporter mocha-teamcity-reporter"
   },
   "repository": {
     "type": "git",
@@ -47,12 +48,13 @@
     "jsdom": "^11.3.0",
     "json-update": "^3.0.0",
     "mocha": "^4.0.1",
+    "mocha-teamcity-reporter": "^1.1.1",
     "react": "^16.0.0",
     "react-dom": "^16.0.0",
     "react-test-renderer": "^16.0.0",
     "rimraf": "^2.6.2"
   },
   "engines": {
-    "node": ">= 8.0" 
+    "node": ">= 8.0"
   }
 }
