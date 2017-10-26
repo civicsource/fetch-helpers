@@ -6,14 +6,18 @@
 	],
 	"env": {
 		"es": {
-			"presets": ["react"]
-		},
-		"cjs": {
 			"presets": [["env", {
 				"targets": {
-				  "browsers": "last 2 versions"
+				  "node": "current"
 				},
-				"useBuiltIns": "usage"
+				"modules": false
+			}], "react"]
+		},
+		"node": {
+			"presets": [["env", {
+				"targets": {
+				  "node": "current"
+				}
 			}], "react"]
 		}
 	}

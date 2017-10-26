@@ -2,15 +2,65 @@
 
 > Response handlers and helpers to parse JSON and deal with HTTP errors when using the [browser fetch API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API)
 
-[See here for a polyfill](https://github.com/github/fetch) if you are using the fetch API in a browser that doesn't support it yet.
+## Usage
 
-## Install
+Install with [yarn](https://yarnpkg.com/en/):
+
+```
+yarn add fetch-helpers
+```
+
+or if that's not your thing:
 
 ```
 npm install fetch-helpers --save
 ```
 
-## API Reference
+### In the Browser
+
+[See here for a browser polyfill](https://github.com/github/fetch) if you are using the fetch API in a browser that doesn't support it yet. This module ships ES2015 code. This means that you will need to compile it before you can use it in the browser since no browser supports all of ES2015 yet. If you are using webpack/babel, in your `webpack.config`:
+
+```js
+{
+	module: {
+		rules: [{
+			test: /\.jsx?$/,
+			use: {
+				loader: "babel-loader"
+			},
+			include: [
+				path.resolve("./src"), // assuming your source code lives in src
+				path.resolve("./node_modules/fetch-helpers") // compile this library, too
+			]
+		}]
+	}
+}
+```
+
+It is recommended to use [babel-preset-env](https://github.com/babel/babel/tree/master/experimental/babel-preset-env) to only compile what you need to target the specific environment you want. Your `.babelrc` might look something like this:
+
+```json
+{
+	"presets": [["env", {
+		"targets": {
+			"browsers": "last 2 versions"
+		},
+		"modules": false
+	}]]
+}
+```
+
+### On the Server
+
+If using this library in node, make use of the [`node-fetch` library](https://github.com/bitinn/node-fetch) to polyfill `fetch`:
+
+```js
+global.fetch = require("node-fetch");
+```
+
+Do that at the beginning of the entry point for your app and then you can use `fetch-helpers` as normal. The `main` target is precompiled for node v8 so as long as you are using that version or greater, you shouldn't have to worry about compilation of this library.
+
+### API Reference
 
 1. [`fetchOnUpdate`](#fetchonupdatefn-keys)
 2. [`checkStatus`](#checkstatusresponse)
