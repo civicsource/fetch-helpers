@@ -144,9 +144,7 @@ describe("Parsing Responses", function() {
 
 			shouldRejectWithError(500);
 
-			it("should use the exception message as the error message", function(
-				done
-			) {
+			it("should use the exception message as the error message", function(done) {
 				this.result.catch(err => {
 					expect(err.message).to.equal(
 						"Cannot do the thing you wanted to do because of some important reason."
@@ -176,9 +174,7 @@ describe("Parsing Responses", function() {
 
 			shouldRejectWithError(500);
 
-			it("should use the exception message as the error message", function(
-				done
-			) {
+			it("should use the exception message as the error message", function(done) {
 				this.result.catch(err => {
 					expect(err.message).to.equal(
 						"Cannot do the thing you wanted to do because of some important reason."
@@ -220,9 +216,7 @@ describe("Parsing Responses", function() {
 
 			shouldRejectWithError(500);
 
-			it("should use the inner-most exception message as the error message", function(
-				done
-			) {
+			it("should use the inner-most exception message as the error message", function(done) {
 				this.result.catch(err => {
 					expect(err.message).to.equal(
 						"Cannot do the thing you wanted to do because of some important reason."
@@ -262,9 +256,7 @@ describe("Parsing Responses", function() {
 
 			shouldRejectWithError(500);
 
-			it("should use the inner-most exception message as the error message", function(
-				done
-			) {
+			it("should use the inner-most exception message as the error message", function(done) {
 				this.result.catch(err => {
 					expect(err.message).to.equal("Cannot do the thing");
 					done();
@@ -302,9 +294,7 @@ describe("Parsing Responses", function() {
 
 			shouldRejectWithError(500);
 
-			it("should use the inner-most exception message as the error message", function(
-				done
-			) {
+			it("should use the inner-most exception message as the error message", function(done) {
 				this.result.catch(err => {
 					expect(err.message).to.equal("Not a useless message");
 					done();
