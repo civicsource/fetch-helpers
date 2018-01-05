@@ -14,14 +14,16 @@ function parseJSONError(response) {
 		response
 			.json()
 			.then(data => {
-				// replace the existing body with the JSON response
-				response.jsonBody = data;
-
 				let msg = parseErrorMessageFromData(data);
 				if (!msg) msg = response.statusText;
 
 				let error = new Error(msg);
-				error.response = response;
+				error.response = {
+					status: response.status,
+					type: response.type,
+					url: response.url,
+					body: data
+				};
 
 				reject(error);
 			})
