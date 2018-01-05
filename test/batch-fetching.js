@@ -205,7 +205,6 @@ describe("Batch fetching", function() {
 			it("should populate the response from the fetch result", function() {
 				expect(this.homerFailure.response).to.be.ok;
 				expect(this.homerFailure.response.status).to.equal(500);
-				expect(this.homerFailure.response.statusText).to.equal("Server Error");
 			});
 		});
 	});
@@ -287,7 +286,6 @@ describe("Batch fetching", function() {
 
 				expect(this.failure.response).to.be.ok;
 				expect(this.failure.response.status).to.equal(500);
-				expect(this.failure.response.statusText).to.equal("Server Error");
 			});
 		});
 	});
@@ -450,7 +448,6 @@ describe("Batch fetching", function() {
 				expect(this.margeFailure).to.be.ok;
 				expect(this.margeFailure.response).to.be.ok;
 				expect(this.margeFailure.response.status).to.equal(404);
-				expect(this.margeFailure.response.statusText).to.equal("Not Found");
 			});
 		});
 
@@ -518,7 +515,6 @@ describe("Batch fetching", function() {
 			it("should populate the response from the fetch result", function() {
 				expect(this.bartFailure.response).to.be.ok;
 				expect(this.bartFailure.response.status).to.equal(404);
-				expect(this.bartFailure.response.statusText).to.equal("Not Found");
 			});
 		});
 	});
