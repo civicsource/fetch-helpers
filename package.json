@@ -9,7 +9,7 @@
     "parseJSONError",
     "batch"
   ],
-  "author": "Chad Lee",
+  "author": "Archon Information Systems",
   "license": "MIT",
   "main": "lib/index.js",
   "module": "es/index.js",
@@ -21,7 +21,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/chadly/fetch-helpers.git"
+    "url": "https://github.com/civicsource/fetch-helpers.git"
   },
   "dependencies": {
     "babel-polyfill": "^6.26.0",
