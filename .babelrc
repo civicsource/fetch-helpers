@@ -1,24 +1,20 @@
 {
 	"plugins": [
 		"lodash",
-		"transform-export-extensions",
-		["transform-object-rest-spread", { "useBuiltIns": true }]
+		"@babel/proposal-export-default-from",
+		"@babel/proposal-class-properties",
+		["@babel/proposal-object-rest-spread", { "useBuiltIns": true }]
 	],
 	"env": {
 		"es": {
-			"presets": [["env", {
-				"targets": {
-				  "node": "current"
-				},
-				"modules": false
-			}], "react"]
+			"presets": ["@babel/react"]
 		},
 		"node": {
-			"presets": [["env", {
+			"presets": [["@babel/env", {
 				"targets": {
 				  "node": "current"
 				}
-			}], "react"]
+			}], "@babel/react"]
 		}
 	}
 }
