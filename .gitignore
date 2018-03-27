@@ -3,3 +3,4 @@ npm-debug.log
 /lib
 /es
 yarn.lock
+yarn-error.log
