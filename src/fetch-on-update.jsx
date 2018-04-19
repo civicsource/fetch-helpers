@@ -1,23 +1,23 @@
-import React, { Component } from "react";
+import React, { Component, createContext } from "react";
 import { get, set } from "lodash";
 import shallowEqual from "shallowequal";
 
 import checkStatus from "./check-status";
 import parseJSON from "./parse-json";
 
-export default function fetchOnUpdate(fn, ...keys) {
-	return DecoratedComponent =>
-		class FetchOnUpdateDecorator extends Component {
-			constructor(props) {
-				super(props);
-				this.state = {};
-			}
+// https://reactjs.org/docs/context.html
+const Context = createContext(false);
 
-			componentWillMount() {
-				this.doFetch();
-			}
+const DisableFetchOnUpdate = ({ children }) => (
+	<Context.Provider value>{children}</Context.Provider>
+);
 
-			componentDidUpdate(prevProps) {
+const fetchOnUpdate = (fn, ...keys) => DecoratedComponent => {
+	class FetchOnUpdateDecorator extends Component {
+		state = {};
+
+		componentDidUpdate(prevProps) {
+			if (!this.props.disableFetch) {
 				// if they didn't specify any keys, we effectively only run the fetch function once on init
 				if (keys.length < 1) return;
 
@@ -28,50 +28,69 @@ export default function fetchOnUpdate(fn, ...keys) {
 					this.doFetch();
 				}
 			}
+		}
 
-			async doFetch() {
-				const result = fn(this.props);
+		UNSAFE_componentWillMount() {
+			// using this instead of componentDidMount in order to fetch data on the server via multiple rendering passes
+			// see https://github.com/reactjs/reactjs.org/issues/727
+			if (!this.props.disableFetch) {
+				this.doFetch();
+			}
+		}
 
-				if (result) {
-					const { url, key = "data", onData, ...opts } = result;
+		async doFetch() {
+			const result = fn(this.props);
 
-					// if they returned an object from the fetch function, let's do the fetch for them
-					// otherwise we assume they did the fetch themselves
-					this.setState(({ isLoaded }) => ({
-						isLoading: true,
-						isLoaded: !!isLoaded, // if this is first time we are fetching, need to set isLoaded to a bool
-						error: null
-					}));
+			if (result) {
+				const { url, key = "data", onData, ...opts } = result;
 
-					try {
-						let response = await fetch(url, opts);
+				// if they returned an object from the fetch function, let's do the fetch for them
+				// otherwise we assume they did the fetch themselves
+				this.setState(({ isLoaded }) => ({
+					isLoading: true,
+					isLoaded: !!isLoaded, // if this is first time we are fetching, need to set isLoaded to a bool
+					error: null
+				}));
 
-						response = await checkStatus(response);
-						response = await parseJSON(response);
+				try {
+					let response = await fetch(url, opts);
 
-						if (onData) {
-							response = onData(response);
-						}
+					response = await checkStatus(response);
+					response = await parseJSON(response);
 
-						this.setState({
-							[key]: response,
-							isLoaded: true,
-							isLoading: false
-						});
-					} catch (ex) {
-						this.setState({
-							isLoading: false,
-							error: ex.message
-						});
+					if (onData) {
+						response = onData(response);
 					}
+
+					this.setState({
+						[key]: response,
+						isLoaded: true,
+						isLoading: false
+					});
+				} catch (ex) {
+					this.setState({
+						isLoading: false,
+						error: ex.message
+					});
 				}
 			}
+		}
 
-			render() {
-				return <DecoratedComponent {...this.props} {...this.state} />;
-			}
-		};
-}
+		render() {
+			return <DecoratedComponent {...this.props} {...this.state} />;
+		}
+	}
+
+	const FetcherWithContext = props => (
+		<Context.Consumer>
+			{disableFetch => (
+				<FetchOnUpdateDecorator {...props} disableFetch={disableFetch} />
+			)}
+		</Context.Consumer>
+	);
+
+	return FetcherWithContext;
+};
 
 function mapParams(paramKeys, params) {
 	const result = {};
@@ -88,3 +107,6 @@ function mapParams(paramKeys, params) {
 
 	return result;
 }
+
+export default fetchOnUpdate;
+export { DisableFetchOnUpdate };
