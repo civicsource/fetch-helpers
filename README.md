@@ -218,6 +218,27 @@ const UserProfileContainer = connect((state, props) =>({
 export default UserProfileContainer;
 ```
 
+#### Disabling Fetching Globally
+
+You can make use of the `DisableFetchOnUpdate` component to disable the behavior of `fetchOnUpdate` for all child components in a given tree. This is useful if you are rendering on the server with multiple rendering passes and don't want the last render pass to load any data. You can use it at the root of your application:
+
+```js
+import { DisableFetchOnUpdate } from "fetch-helpers";
+
+// first pass render that will trigger any data to load using fetchOnUpdate
+let html = renderToString(<MyApplication />);
+
+// wait for any pending data fetches (or timeout)
+await waitForData();
+
+// rerender without triggering any more data fetches (just render the current state as is)
+html = renderToString(
+	<DisableFetchOnUpdate>
+		<MyApplication />
+	</DisableFetchOnUpdate>
+);
+```
+
 ### `checkStatus(response)`
 
 [Read here](https://github.com/github/fetch#handling-http-error-statuses) for the inspiration for this function. It will reject fetch requests on any non-2xx response. It differs from the example in that it will try to parse a JSON body from the non-200 response and will set any `message` field (if it exists) from the JSON body as the error message.
