@@ -16,6 +16,14 @@ const fetchOnUpdate = (fn, ...keys) => DecoratedComponent => {
 	class FetchOnUpdateDecorator extends Component {
 		state = {};
 
+		UNSAFE_componentWillMount() {
+			// using this instead of componentDidMount in order to fetch data on the server via multiple rendering passes
+			// see https://github.com/reactjs/reactjs.org/issues/727
+			if (!this.props.disableFetch) {
+				this.doFetch();
+			}
+		}
+
 		componentDidUpdate(prevProps) {
 			if (!this.props.disableFetch) {
 				// if they didn't specify any keys, we effectively only run the fetch function once on init
@@ -27,14 +35,6 @@ const fetchOnUpdate = (fn, ...keys) => DecoratedComponent => {
 				if (!shallowEqual(params, prevParams)) {
 					this.doFetch();
 				}
-			}
-		}
-
-		UNSAFE_componentWillMount() {
-			// using this instead of componentDidMount in order to fetch data on the server via multiple rendering passes
-			// see https://github.com/reactjs/reactjs.org/issues/727
-			if (!this.props.disableFetch) {
-				this.doFetch();
 			}
 		}
 
