@@ -49,7 +49,6 @@
     "eslint": "^4.19.1",
     "eslint-config-civicsource": "^9.0.0",
     "jsdom": "^11.6.2",
-    "json-update": "^3.0.0",
     "mocha": "^5.1.1",
     "mocha-teamcity-reporter": "^2.3.0",
     "react": "^16.3.2",
