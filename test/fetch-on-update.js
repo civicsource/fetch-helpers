@@ -9,7 +9,7 @@ import { fetchOnUpdate } from "../src";
 
 configure({ adapter: new Adapter() });
 
-xdescribe("Fetching on component props update", function() {
+describe("Fetching on component props update", function() {
 	behavesLikeBrowser();
 
 	beforeEach(function() {

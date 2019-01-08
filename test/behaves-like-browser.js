@@ -15,13 +15,6 @@ export default function() {
 			userAgent: "node.js"
 		};
 
-		Object.keys(global.document.defaultView).forEach(property => {
-			if (typeof global[property] === "undefined") {
-				this.exposedProperties.push(property);
-				global[property] = global.document.defaultView[property];
-			}
-		});
-
 		this.requests = [];
 
 		global.fetch = url =>

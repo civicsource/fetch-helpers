@@ -1,38 +1,27 @@
-import React, { Component, createContext } from "react";
+import React, { Component } from "react";
 import { get, set } from "lodash";
 import shallowEqual from "shallowequal";
 
 import checkStatus from "./check-status";
 import parseJSON from "./parse-json";
 
-// https://reactjs.org/docs/context.html
-const Context = createContext(false);
-
-const DisableFetchOnUpdate = ({ children }) => (
-	<Context.Provider value>{children}</Context.Provider>
-);
-
 const fetchOnUpdate = (fn, ...keys) => DecoratedComponent => {
 	class FetchOnUpdateDecorator extends Component {
 		state = {};
 
 		componentDidMount() {
-			if (!this.props.disableFetch) {
-				this.doFetch();
-			}
+			this.doFetch();
 		}
 
 		componentDidUpdate(prevProps) {
-			if (!this.props.disableFetch) {
-				// if they didn't specify any keys, we effectively only run the fetch function once on init
-				if (keys.length < 1) return;
+			// if they didn't specify any keys, we effectively only run the fetch function once on init
+			if (keys.length < 1) return;
 
-				const params = mapParams(keys, this.props);
-				const prevParams = mapParams(keys, prevProps);
+			const params = mapParams(keys, this.props);
+			const prevParams = mapParams(keys, prevProps);
 
-				if (!shallowEqual(params, prevParams)) {
-					this.doFetch();
-				}
+			if (!shallowEqual(params, prevParams)) {
+				this.doFetch();
 			}
 		}
 
@@ -79,15 +68,7 @@ const fetchOnUpdate = (fn, ...keys) => DecoratedComponent => {
 		}
 	}
 
-	const FetcherWithContext = props => (
-		<Context.Consumer>
-			{disableFetch => (
-				<FetchOnUpdateDecorator {...props} disableFetch={disableFetch} />
-			)}
-		</Context.Consumer>
-	);
-
-	return FetcherWithContext;
+	return FetchOnUpdateDecorator;
 };
 
 function mapParams(paramKeys, params) {
@@ -107,4 +88,3 @@ function mapParams(paramKeys, params) {
 }
 
 export default fetchOnUpdate;
-export { DisableFetchOnUpdate };
