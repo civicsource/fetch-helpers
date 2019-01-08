@@ -17,9 +17,9 @@ export default function() {
 
 		this.requests = [];
 
-		global.fetch = url =>
+		global.fetch = (url, opts) =>
 			new Promise((resolve, reject) => {
-				this.requests.push({ url, resolve, reject });
+				this.requests.push({ ...opts, url, resolve, reject });
 			});
 	});
 

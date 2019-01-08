@@ -63,11 +63,14 @@ Do that at the beginning of the entry point for your app and then you can use `f
 ### API Reference
 
 1. [`fetchOnUpdate`](#fetchonupdatefn-keys)
-2. [`checkStatus`](#checkstatusresponse)
-3. [`parseJSON`](#parsejsonresponse)
-4. [`batchFetch`](#batchfetchkeyname-performfetch--maxbatchsize-timeout-)
+2. [`Fetch`](#fetch)
+3. [`checkStatus`](#checkstatusresponse)
+4. [`parseJSON`](#parsejsonresponse)
+5. [`batchFetch`](#batchfetchkeyname-performfetch--maxbatchsize-timeout-)
 
 ### `fetchOnUpdate(fn, [...keys])`
+
+> For a [render prop](https://reactjs.org/docs/render-props.html) version of this, [see the `Fetch` component](#fetch).
 
 This is a [HOC (higher order component)](https://facebook.github.io/react/docs/higher-order-components.html) that will reduce the amount of boilerplate you need when writing a component that will need to do data fetching on render. In general, you should strive to separate your components into [presentational & container components](https://medium.com/@dan_abramov/smart-and-dumb-components-7ca2f9a7c7d0). In doing this, you can cleanly separate your presentation logic from your data-fetching logic. Here is an example:
 
@@ -217,6 +220,38 @@ const UserProfileContainer = connect((state, props) =>({
 
 export default UserProfileContainer;
 ```
+
+### `Fetch`
+
+This is a [render prop](https://reactjs.org/docs/render-props.html) version of the [`fetchOnUpdate` HOC](#fetchonupdatefn-keys). It works mostly the same as the HOC but does not support the same advanced usage.
+
+```js
+const UserProfile = ({ username })=>(
+	<Fetch url={`http://example.com/api/${username}`} method="GET">
+		{({ data: user, isLoading, isLoaded, error }) => {
+			if (error) {
+				return <span>Error loading user: {error}</span>;
+			}
+
+			if (isLoading && !isLoaded) {
+				return <span>Loading...</span>;
+			}
+
+			if (!isLoaded) {
+				return null;
+			}
+
+			// we may still need to show a loading indicator if the user is loaded
+			// but we are loading more data for the user, e.g. "refreshing the user"
+			const loadingIndicator = isLoading ? <span>Loading...</span> : null;
+			return <span title={user.username}>{user.email} {loadingIndicator}</span>;
+		}}
+	</Fetch>
+```
+
+You can pass [any valid `fetch` option](https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/fetch#Parameters) as a prop to the `Fetch` component.
+
+The `Fetch` component will only fetch when the component is first mounted or when any of its `props` change (via a shallow compare). If you would like to force it to render any other time (e.g. without any `props` change), you can set a `key` on the component. Read more about using this [technique to reset a component's state](https://medium.com/@albertogasparin/forcing-state-reset-on-a-react-component-by-using-the-key-prop-14b36cd7448e).
 
 ### `checkStatus(response)`
 
