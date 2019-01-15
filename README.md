@@ -62,15 +62,13 @@ Do that at the beginning of the entry point for your app and then you can use `f
 
 ### API Reference
 
-1. [`fetchOnUpdate`](#fetchonupdatefn-keys)
-2. [`Fetch`](#fetch)
+1. [`connect`](#connectfn)
+2. [`fetchOnUpdate`](#fetchonupdatefn-keys)
 3. [`checkStatus`](#checkstatusresponse)
 4. [`parseJSON`](#parsejsonresponse)
 5. [`batchFetch`](#batchfetchkeyname-performfetch--maxbatchsize-timeout-)
 
-### `fetchOnUpdate(fn, [...keys])`
-
-> For a [render prop](https://reactjs.org/docs/render-props.html) version of this, [see the `Fetch` component](#fetch).
+### `connect(fn, [...keys])`
 
 This is a [HOC (higher order component)](https://facebook.github.io/react/docs/higher-order-components.html) that will reduce the amount of boilerplate you need when writing a component that will need to do data fetching on render. In general, you should strive to separate your components into [presentational & container components](https://medium.com/@dan_abramov/smart-and-dumb-components-7ca2f9a7c7d0). In doing this, you can cleanly separate your presentation logic from your data-fetching logic. Here is an example:
 
@@ -161,49 +159,96 @@ export default class UserContainer extends Component {
 That is a lot of boilerplate to load the data once the component mounts and doesn't even handle the case where the `username` prop changes after the component is mounted. `fetchOnUpdate` can reduce all of that to this equivalent code:
 
 ```js
-import { fetchOnUpdate } from "fetch-helpers";
+import { connect } from "fetch-helpers";
 
-const UserProfileFetcher = fetchOnUpdate(({ username }) =>  ({
-	url: `http://example.com/api/${username}`, // the URL to make a fetch request to
-	key: "user", // the name of the prop to pass the parsed JSON data from the response as (default is 'data' if not specified)
-
-	method: "GET" // any otherstandard fetch options
+const UserProfileFetcher = connect(({ username }) => ({
+	user: {
+		url: `http://example.com/api/${username}`, // the URL to make a fetch request to
+		method: "GET" // any other standard fetch options
+	}
 }))(UserProfile);
 
 export default UserProfileFetcher;
 ```
 
-The first argument is a function that takes the current props and should return an object describing how to fetch the requested data. `fetchOnUpdate` will generate the `isLoading`, `isLoaded`, & `error` statuses and pass that down to the wrapped component as props.
+The first argument is a function that takes the current props and should return a keyed object describing how to fetch the requested data. `connect` will generate the `isLoading`, `isLoaded`, & `error` statuses and pass that down to the wrapped component under the `user` prop.
 
-By default, it will only run the fetch when the component is initially mounted. Optionally, if your component takes more `props` and you want to fetch on certain prop updates (which is usually the case), you can pass a list of keys to `fetchOnUpdate`:
+By default, it will only run the fetch when the component is initially mounted. Optionally, if your component takes more `props` and you want to fetch on certain prop updates (which is usually the case), you can pass a list of keys to `connect`:
 
 ```js
-const UserProfileFetcher = fetchOnUpdate(({ username }) =>  ({
-	url: `http://example.com/api/${username}`,
-	key: "user"
-}), "username", "someOtherProp")(UserProfile);
+const FetchingComponent = connect(({ username }) => ({
+	user: {
+		url: `http://example.com/api/${username}`,
+		keys: ["username", "someOtherProp"]
+	}
+}))(UserProfile);
 
 export default UserProfileFetcher;
 ```
 
-The second argument is the prop to monitor for changes and if that prop changes, it will run the fetch again. You can pass an arbitrary number of props to monitor for changes. Each prop can use object paths of arbitrary length: e.g. `user.username`; in which case the fetch will only run if the `username` field on `user` changes.
+The `keys` are the props `connect` should monitor for changes and if any of those props change (via a shallow compare), it will run the fetch again. You can pass an arbitrary number of props to monitor for changes. Each prop can use object paths of arbitrary length: e.g. `user.username`; in which case the fetch will only run if the `username` field on `user` changes. If no `keys` are specified, the fetch will only be run once when the component is first mounted.
 
-#### Advanced Usage
+#### Fetching Multiple Resources
 
-You can also pass a data manipulation function, `onData`, to alter the data returned from the server before passing it to the component:
+You can fetch multiple resources at once by passing more than one key to the `connect` HOC:
 
 ```js
-const UserProfileFetcher = fetchOnUpdate(({ username }) =>  ({
-	url: `http://example.com/api/${username}`,
-	key: "user",
-	onData: user => ({
-		...user,
-		from: "server"
-	})
-}), "username")(UserProfile);
+import { connect } from "fetch-helpers";
+
+const FetchingComponent = connect(({ fruitType }) => ({
+	users: `http://example.com/api/users`,
+	fruits: {
+		url: `http://example.com/api/fruits/${fruitType}`,
+		keys: ["fruitType"]
+	}
+}))(MyComponent);
 ```
 
-If you need to completely override the builtin functionality, you can do that as well. If your `fn` does not return an object describing how to fetch the data, `fetchOnUpdate` will assume that you are handling all that yourself. This is useful, for example, if you just want to trigger a redux action and retrieve loading statuses & such from the store:
+This will fetch `users` & `fruits` from the server as soon as the component is first mounted. After that, any time the `fruitType` prop changes, it will fetch the `fruits` again.
+
+#### `onData`
+
+You can pass a data manipulation function, `onData`, to alter the data returned from the server before passing it to the component:
+
+```js
+const UserProfileFetcher = connect(({ username }) => ({
+	user:{
+		url: `http://example.com/api/${username}`,
+		bearerToken: "poop",
+		keys: ["username"]
+	}
+}))(UserProfile);
+```
+
+#### `bearerToken`
+
+As a convenience, you can pass a `bearerToken` to add an `Authorization` header to the outgoing request:
+
+```js
+const UserProfileFetcher = connect(({ username }) =>  ({
+	users: {
+		url: `http://example.com/api/users`,
+		bearerToken: "mytoken"
+	}
+}))(UserProfile);
+```
+
+#### Arbitrary `fetch` Options
+
+You can pass arbitrary [`fetch` options](https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/fetch#Parameters) that will be passed to `fetch` unaltered:
+
+```js
+const UserProfileFetcher = connect(({ username }) =>  ({
+	users: {
+		url: `http://example.com/api/users`,
+		headers: { Accept: "text/plain" }
+	}
+}))(UserProfile);
+```
+
+### `fetchOnUpdate(fn, [...keys])`
+
+This HOC performs a very similar to function as that of `connect` but instead of calculating statuses itself, it will run a specified function any time any of the given props change (via a shallow compare). This is useful, for example, if you just want to trigger a redux action and retrieve loading statuses & such from the store when props change:
 
 ```js
 const UserProfileFetcher = fetchOnUpdate(({ username, fetchUser }) => {
@@ -221,37 +266,7 @@ const UserProfileContainer = connect((state, props) =>({
 export default UserProfileContainer;
 ```
 
-### `Fetch`
-
-This is a [render prop](https://reactjs.org/docs/render-props.html) version of the [`fetchOnUpdate` HOC](#fetchonupdatefn-keys). It works mostly the same as the HOC but does not support the same advanced usage.
-
-```js
-const UserProfile = ({ username })=>(
-	<Fetch url={`http://example.com/api/${username}`} method="GET">
-		{({ data: user, isLoading, isLoaded, error }) => {
-			if (error) {
-				return <span>Error loading user: {error}</span>;
-			}
-
-			if (isLoading && !isLoaded) {
-				return <span>Loading...</span>;
-			}
-
-			if (!isLoaded) {
-				return null;
-			}
-
-			// we may still need to show a loading indicator if the user is loaded
-			// but we are loading more data for the user, e.g. "refreshing the user"
-			const loadingIndicator = isLoading ? <span>Loading...</span> : null;
-			return <span title={user.username}>{user.email} {loadingIndicator}</span>;
-		}}
-	</Fetch>
-```
-
-You can pass [any valid `fetch` option](https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/fetch#Parameters) as a prop to the `Fetch` component.
-
-The `Fetch` component will only fetch when the component is first mounted or when any of its `props` change (via a shallow compare). If you would like to force it to render any other time (e.g. without any `props` change), you can set a `key` on the component. Read more about using this [technique to reset a component's state](https://medium.com/@albertogasparin/forcing-state-reset-on-a-react-component-by-using-the-key-prop-14b36cd7448e).
+The second argument to `fetchOnUpdate` is the prop to monitor for changes and if that prop changes, it will run the fetch again. You can pass an arbitrary number of props to monitor for changes. Each prop can use object paths of arbitrary length: e.g. `user.username`; in which case the fetch will only run if the username field on user changes.
 
 ### `checkStatus(response)`
 
