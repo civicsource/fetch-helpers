@@ -5,6 +5,8 @@ import React from "react";
 import { configure, mount } from "enzyme";
 import Adapter from "enzyme-adapter-react-16";
 
+import { isFunction } from "lodash";
+
 import { connect } from "../src";
 
 configure({ adapter: new Adapter() });
@@ -405,5 +407,64 @@ describe("Connecting a component to fetch", function() {
 		});
 	});
 
-	describe("when rendering a component with a lazy function", function() {});
+	describe("when rendering a component with a lazy function", function() {
+		beforeEach(function() {
+			this.FetchingComponent = connect(() => ({
+				saveBanana: name => ({
+					bananaSaveResult: {
+						url: `http://example.com/api/bananas/`,
+						method: "POST",
+						body: JSON.stringify({ name })
+					}
+				})
+			}))(this.NakedComponent);
+
+			this.wrapper = mount(<this.FetchingComponent />);
+		});
+
+		it("should not make a fetch API request", function() {
+			expect(this.requests.length).to.equal(0);
+		});
+
+		it("should pass lazy function as prop", function() {
+			expect(this.renderedProps).to.be.ok;
+			const { saveBanana } = this.renderedProps;
+			expect(saveBanana).to.be.a("function");
+		});
+
+		it("should not pass anything for save results", function() {
+			expect(this.renderedProps).to.be.ok;
+			const { bananaSaveResult } = this.renderedProps;
+			expect(bananaSaveResult).to.not.be.ok;
+		});
+
+		describe("and then invoking the lazy function", function() {
+			beforeEach(function() {
+				this.renderedProps.saveBanana("Bob");
+			});
+
+			it("should make a fetch API request", function() {
+				expect(this.requests.length).to.equal(1);
+
+				const req = this.requests[0];
+
+				expect(req.url).to.equal("http://example.com/api/bananas/");
+				expect(req.method).to.equal("POST");
+				expect(req.body).to.equal('{"name":"Bob"}');
+			});
+
+			it("should pass status props to the component", function() {
+				expect(this.renderedProps).to.be.ok;
+
+				const { bananaSaveResult } = this.renderedProps;
+				expect(bananaSaveResult).to.be.ok;
+
+				expect(bananaSaveResult.isLoading).to.be.true;
+				expect(bananaSaveResult.isLoaded).to.be.false;
+				expect(bananaSaveResult.error).to.not.be.ok;
+
+				expect(bananaSaveResult.data).to.not.be.ok;
+			});
+		});
+	});
 });

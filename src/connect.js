@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { get, set, isString } from "lodash";
+import { get, set, isString, isFunction } from "lodash";
 import shallowEqual from "shallowequal";
 
 import checkStatus from "./check-status";
@@ -15,10 +15,7 @@ const connect = fn => DecoratedComponent =>
 			if (itemsToFetch) {
 				for (let key in itemsToFetch) {
 					const item = itemsToFetch[key];
-
-					if (item) {
-						this.doFetch(key, item);
-					}
+					this.processItem(key, item);
 				}
 			}
 		}
@@ -37,11 +34,35 @@ const connect = fn => DecoratedComponent =>
 						const prevParams = mapParams(keys, prevProps);
 
 						if (!shallowEqual(params, prevParams)) {
-							this.doFetch(key, item);
+							this.processItem(key, item);
 						}
 					}
 				}
 			}
+		}
+
+		processItem(key, item) {
+			if (!item) return;
+
+			if (isFunction(item)) {
+				this.createLazyFunc(key, item);
+			} else {
+				this.doFetch(key, item);
+			}
+		}
+
+		createLazyFunc(key, lazyFn) {
+			this.setState({
+				[key]: (...args) => {
+					const result = lazyFn(...args);
+					if (result) {
+						for (let subkey in result) {
+							const item = result[subkey];
+							this.processItem(subkey, item);
+						}
+					}
+				}
+			});
 		}
 
 		async doFetch(key, item) {
