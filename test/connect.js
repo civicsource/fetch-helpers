@@ -218,6 +218,34 @@ describe("Connecting a component to fetch", function() {
 					expect(bananas.data[0]).to.equal("ripe banana");
 					expect(bananas.data[1]).to.equal("green banana");
 				});
+
+				describe("with another successful server response", function() {
+					beforeEach(function(done) {
+						this.requests.pop().resolve({
+							status: 200,
+							statusText: "OK",
+							json: async () => ["purple banana", "orange banana"]
+						});
+
+						setTimeout(done, 10);
+					});
+
+					it("should pass newly loaded data", function() {
+						expect(this.renderedProps).to.be.ok;
+
+						const { bananas } = this.renderedProps;
+						expect(bananas).to.be.ok;
+
+						expect(bananas.isFetching).to.be.false;
+						expect(bananas.isFetched).to.be.true;
+						expect(bananas.error).to.not.be.ok;
+
+						expect(bananas.data).to.be.ok;
+						expect(bananas.data).to.have.lengthOf(2);
+						expect(bananas.data[0]).to.equal("purple banana");
+						expect(bananas.data[1]).to.equal("orange banana");
+					});
+				});
 			});
 
 			describe("and then setting setting arbitrary props on the component", function() {
