@@ -5,8 +5,6 @@ import React from "react";
 import { configure, mount } from "enzyme";
 import Adapter from "enzyme-adapter-react-16";
 
-import { isFunction } from "lodash";
-
 import { connect } from "../src";
 
 configure({ adapter: new Adapter() });
@@ -53,8 +51,8 @@ describe("Connecting a component to fetch", function() {
 			const { bananas } = this.renderedProps;
 			expect(bananas).to.be.ok;
 
-			expect(bananas.isLoading).to.be.true;
-			expect(bananas.isLoaded).to.be.false;
+			expect(bananas.isFetching).to.be.true;
+			expect(bananas.isFetched).to.be.false;
 			expect(bananas.error).to.not.be.ok;
 
 			expect(bananas.data).to.not.be.ok;
@@ -77,8 +75,8 @@ describe("Connecting a component to fetch", function() {
 				const { bananas } = this.renderedProps;
 				expect(bananas).to.be.ok;
 
-				expect(bananas.isLoading).to.be.false;
-				expect(bananas.isLoaded).to.be.true;
+				expect(bananas.isFetching).to.be.false;
+				expect(bananas.isFetched).to.be.true;
 				expect(bananas.error).to.not.be.ok;
 
 				expect(bananas.data).to.be.ok;
@@ -117,8 +115,8 @@ describe("Connecting a component to fetch", function() {
 				const { bananas } = this.renderedProps;
 				expect(bananas).to.be.ok;
 
-				expect(bananas.isLoading).to.be.false;
-				expect(bananas.isLoaded).to.be.false;
+				expect(bananas.isFetching).to.be.false;
+				expect(bananas.isFetched).to.be.false;
 				expect(bananas.error).to.equal("Not today, buddy");
 
 				expect(bananas.data).to.not.be.ok;
@@ -159,8 +157,8 @@ describe("Connecting a component to fetch", function() {
 			const { bananas } = this.renderedProps;
 			expect(bananas).to.be.ok;
 
-			expect(bananas.isLoading).to.be.true;
-			expect(bananas.isLoaded).to.be.false;
+			expect(bananas.isFetching).to.be.true;
+			expect(bananas.isFetched).to.be.false;
 			expect(bananas.error).to.not.be.ok;
 
 			expect(bananas.data).to.not.be.ok;
@@ -183,8 +181,8 @@ describe("Connecting a component to fetch", function() {
 				const { bananas } = this.renderedProps;
 				expect(bananas).to.be.ok;
 
-				expect(bananas.isLoading).to.be.false;
-				expect(bananas.isLoaded).to.be.true;
+				expect(bananas.isFetching).to.be.false;
+				expect(bananas.isFetched).to.be.true;
 				expect(bananas.error).to.not.be.ok;
 
 				expect(bananas.data).to.be.ok;
@@ -211,8 +209,8 @@ describe("Connecting a component to fetch", function() {
 					const { bananas } = this.renderedProps;
 					expect(bananas).to.be.ok;
 
-					expect(bananas.isLoading).to.be.true;
-					expect(bananas.isLoaded).to.be.true;
+					expect(bananas.isFetching).to.be.true;
+					expect(bananas.isFetched).to.be.true;
 					expect(bananas.error).to.not.be.ok;
 
 					expect(bananas.data).to.be.ok;
@@ -252,8 +250,8 @@ describe("Connecting a component to fetch", function() {
 				const { bananas } = this.renderedProps;
 				expect(bananas).to.be.ok;
 
-				expect(bananas.isLoading).to.be.false;
-				expect(bananas.isLoaded).to.be.false;
+				expect(bananas.isFetching).to.be.false;
+				expect(bananas.isFetched).to.be.false;
 				expect(bananas.error).to.equal("Not today, buddy");
 
 				expect(bananas.data).to.not.be.ok;
@@ -277,8 +275,8 @@ describe("Connecting a component to fetch", function() {
 					const { bananas } = this.renderedProps;
 					expect(bananas).to.be.ok;
 
-					expect(bananas.isLoading).to.be.true;
-					expect(bananas.isLoaded).to.be.false;
+					expect(bananas.isFetching).to.be.true;
+					expect(bananas.isFetched).to.be.false;
 					expect(bananas.error).to.not.be.ok;
 
 					expect(bananas.data).to.not.be.ok;
@@ -400,8 +398,8 @@ describe("Connecting a component to fetch", function() {
 			const { bananas } = this.renderedProps;
 			expect(bananas).to.be.ok;
 
-			expect(bananas.isLoading).to.be.false;
-			expect(bananas.isLoaded).to.be.true;
+			expect(bananas.isFetching).to.be.false;
+			expect(bananas.isFetched).to.be.true;
 			expect(bananas.error).to.not.be.ok;
 			expect(bananas.data).to.not.be.ok;
 		});
@@ -459,8 +457,8 @@ describe("Connecting a component to fetch", function() {
 				const { bananaSaveResult } = this.renderedProps;
 				expect(bananaSaveResult).to.be.ok;
 
-				expect(bananaSaveResult.isLoading).to.be.true;
-				expect(bananaSaveResult.isLoaded).to.be.false;
+				expect(bananaSaveResult.isFetching).to.be.true;
+				expect(bananaSaveResult.isFetched).to.be.false;
 				expect(bananaSaveResult.error).to.not.be.ok;
 
 				expect(bananaSaveResult.data).to.not.be.ok;

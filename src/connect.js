@@ -90,8 +90,8 @@ const connect = fn => DecoratedComponent =>
 			this.setState(prevState => ({
 				[key]: {
 					data: get(prevState, `${key}.data`),
-					isLoading: true,
-					isLoaded: !!get(prevState, `${key}.isLoaded`), // if this is first time we are fetching, need to set isLoaded to a bool
+					isFetching: true,
+					isFetched: !!get(prevState, `${key}.isFetched`), // if this is first time we are fetching, need to set isFetched to a bool
 					error: null
 				}
 			}));
@@ -115,8 +115,8 @@ const connect = fn => DecoratedComponent =>
 				this.setState({
 					[key]: {
 						data: response,
-						isLoading: false,
-						isLoaded: true,
+						isFetching: false,
+						isFetched: true,
 						error: null
 					}
 				});
@@ -124,8 +124,8 @@ const connect = fn => DecoratedComponent =>
 				this.setState(prevState => ({
 					[key]: {
 						data: prevState[key].data,
-						isLoading: false,
-						isLoaded: prevState[key].isLoaded,
+						isFetching: false,
+						isFetched: prevState[key].isFetched,
 						error: ex.message
 					}
 				}));
