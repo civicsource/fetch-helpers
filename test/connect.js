@@ -493,4 +493,148 @@ describe("Connecting a component to fetch", function() {
 			});
 		});
 	});
+
+	describe("when rendering a component with a reset", function() {
+		beforeEach(function(done) {
+			this.FetchingComponent = connect(() => ({
+				saveBanana: name => ({
+					bananaSaveResult: {
+						url: `http://example.com/api/bananas/`,
+						method: "POST",
+						body: JSON.stringify({ name }),
+						reset: 100
+					}
+				})
+			}))(this.NakedComponent);
+
+			this.wrapper = mount(<this.FetchingComponent />);
+
+			this.renderedProps.saveBanana("Bob");
+
+			this.requests.pop().resolve({
+				status: 200,
+				statusText: "OK",
+				json: async () => ({ name: "Bob" })
+			});
+
+			setTimeout(done, 10);
+		});
+
+		it("should pass status props to the component", function() {
+			expect(this.renderedProps).to.be.ok;
+
+			const { bananaSaveResult } = this.renderedProps;
+			expect(bananaSaveResult).to.be.ok;
+
+			expect(bananaSaveResult.isFetching).to.be.false;
+			expect(bananaSaveResult.isFetched).to.be.true;
+			expect(bananaSaveResult.error).to.not.be.ok;
+
+			expect(bananaSaveResult.data).to.deep.equal({ name: "Bob" });
+		});
+
+		describe("and then waiting the reset threshold time", function() {
+			beforeEach(function(done) {
+				setTimeout(done, 110);
+			});
+
+			it("should clear status props to the component", function() {
+				expect(this.renderedProps).to.be.ok;
+
+				const { bananaSaveResult } = this.renderedProps;
+				expect(bananaSaveResult).to.be.ok;
+
+				expect(bananaSaveResult.isFetching).to.be.false;
+				expect(bananaSaveResult.isFetched).to.be.false;
+				expect(bananaSaveResult.error).to.not.be.ok;
+
+				expect(bananaSaveResult.data).to.not.be.ok;
+			});
+		});
+
+		describe("and then triggering another fetch before the reset threshold time", function() {
+			beforeEach(function(done) {
+				setTimeout(() => {
+					this.renderedProps.saveBanana("Homer");
+					done();
+				}, 80);
+			});
+
+			it("should mark status as refetching", function() {
+				expect(this.renderedProps).to.be.ok;
+
+				const { bananaSaveResult } = this.renderedProps;
+				expect(bananaSaveResult).to.be.ok;
+
+				expect(bananaSaveResult.isFetching).to.be.true;
+				expect(bananaSaveResult.isFetched).to.be.true;
+				expect(bananaSaveResult.error).to.not.be.ok;
+
+				expect(bananaSaveResult.data).to.deep.equal({ name: "Bob" });
+			});
+
+			describe("and then waiting enough time for the original reset but not enough time for the next reset", function() {
+				beforeEach(function(done) {
+					setTimeout(done, 25);
+				});
+
+				it("should not reset data", function() {
+					expect(this.renderedProps).to.be.ok;
+
+					const { bananaSaveResult } = this.renderedProps;
+					expect(bananaSaveResult).to.be.ok;
+
+					expect(bananaSaveResult.isFetching).to.be.true;
+					expect(bananaSaveResult.isFetched).to.be.true;
+					expect(bananaSaveResult.error).to.not.be.ok;
+
+					expect(bananaSaveResult.data).to.deep.equal({ name: "Bob" });
+				});
+			});
+
+			describe("and then receiving data and waiting past the original reset time", function() {
+				beforeEach(function(done) {
+					this.requests.pop().resolve({
+						status: 200,
+						statusText: "OK",
+						json: async () => ({ name: "Homer" })
+					});
+
+					setTimeout(done, 25);
+				});
+
+				it("should not reset data", function() {
+					expect(this.renderedProps).to.be.ok;
+
+					const { bananaSaveResult } = this.renderedProps;
+					expect(bananaSaveResult).to.be.ok;
+
+					expect(bananaSaveResult.isFetching).to.be.false;
+					expect(bananaSaveResult.isFetched).to.be.true;
+					expect(bananaSaveResult.error).to.not.be.ok;
+
+					expect(bananaSaveResult.data).to.deep.equal({ name: "Homer" });
+				});
+
+				describe("and then waiting for the next reset threshold time", function() {
+					beforeEach(function(done) {
+						setTimeout(done, 110);
+					});
+
+					it("should clear status props to the component", function() {
+						expect(this.renderedProps).to.be.ok;
+
+						const { bananaSaveResult } = this.renderedProps;
+						expect(bananaSaveResult).to.be.ok;
+
+						expect(bananaSaveResult.isFetching).to.be.false;
+						expect(bananaSaveResult.isFetched).to.be.false;
+						expect(bananaSaveResult.error).to.not.be.ok;
+
+						expect(bananaSaveResult.data).to.not.be.ok;
+					});
+				});
+			});
+		});
+	});
 });

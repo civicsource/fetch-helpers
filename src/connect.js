@@ -41,6 +41,16 @@ const connect = fn => DecoratedComponent =>
 			}
 		}
 
+		componentWillUnMount() {
+			for (let key in this.timers) {
+				clearTimeout(this.timers[key]);
+			}
+
+			this.timers = {};
+		}
+
+		timers = {};
+
 		processItem(key, item) {
 			if (!item) return;
 
@@ -66,7 +76,7 @@ const connect = fn => DecoratedComponent =>
 		}
 
 		async doFetch(key, item) {
-			let { url, onData, bearerToken, ...opts } = item;
+			let { url, onData, bearerToken, reset, ...opts } = item;
 
 			if (!url && isString(item)) {
 				url = item;
@@ -85,6 +95,12 @@ const connect = fn => DecoratedComponent =>
 
 			if (bearerToken) {
 				headers["Authorization"] = `Bearer ${bearerToken}`;
+			}
+
+			if (this.timers[key]) {
+				// clear any pending reset
+				clearTimeout(this.timers[key]);
+				delete this.timers[key];
 			}
 
 			this.setState(prevState => ({
@@ -120,6 +136,22 @@ const connect = fn => DecoratedComponent =>
 						error: null
 					}
 				});
+
+				if (reset) {
+					this.timers[key] = setTimeout(() => {
+						// reset the state
+						this.setState({
+							[key]: {
+								data: null,
+								isFetching: false,
+								isFetched: false,
+								error: null
+							}
+						});
+
+						delete this.timers[key];
+					}, reset);
+				}
 			} catch (ex) {
 				this.setState(prevState => ({
 					[key]: {
