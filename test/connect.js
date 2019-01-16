@@ -375,4 +375,35 @@ describe("Connecting a component to fetch", function() {
 			expect(req.headers["Content-Type"]).to.equal("text/plain");
 		});
 	});
+
+	describe("when rendering a component that returns a 204", function() {
+		beforeEach(function(done) {
+			this.FetchingComponent = connect(() => ({
+				bananas: `http://example.com/api/bananas/`
+			}))(this.NakedComponent);
+
+			this.wrapper = mount(<this.FetchingComponent />);
+
+			this.requests.pop().resolve({
+				status: 204,
+				statusText: "No Content"
+			});
+
+			setTimeout(done, 10);
+		});
+
+		it("should pass null data with status props", function() {
+			expect(this.renderedProps).to.be.ok;
+
+			const { bananas } = this.renderedProps;
+			expect(bananas).to.be.ok;
+
+			expect(bananas.isLoading).to.be.false;
+			expect(bananas.isLoaded).to.be.true;
+			expect(bananas.error).to.not.be.ok;
+			expect(bananas.data).to.not.be.ok;
+		});
+	});
+
+	describe("when rendering a component with a lazy function", function() {});
 });

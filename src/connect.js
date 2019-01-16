@@ -79,10 +79,16 @@ const connect = fn => DecoratedComponent =>
 				let response = await fetch(url, { ...otherOpts, headers });
 
 				response = await checkStatus(response);
-				response = await parseJSON(response);
 
-				if (onData) {
-					response = onData(response);
+				if (response.status != 204) {
+					response = await parseJSON(response);
+
+					if (onData) {
+						response = onData(response);
+					}
+				} else {
+					// for 204 No Content, just return null data
+					response = null;
 				}
 
 				this.setState({
