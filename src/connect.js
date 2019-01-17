@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { get, set, isString, isFunction } from "lodash";
+import { get, set, isString, isFunction, reduce } from "lodash";
 import shallowEqual from "shallowequal";
 
 import checkStatus from "./check-status";
@@ -76,7 +76,7 @@ const connect = fn => DecoratedComponent =>
 		}
 
 		async doFetch(key, item) {
-			let { url, onData, bearerToken, reset, ...opts } = item;
+			let { url, onData, onComplete, bearerToken, reset, ...opts } = item;
 
 			if (!url && isString(item)) {
 				url = item;
@@ -128,14 +128,46 @@ const connect = fn => DecoratedComponent =>
 					response = null;
 				}
 
-				this.setState({
-					[key]: {
-						data: response,
-						isFetching: false,
-						isFetched: true,
-						error: null
+				this.setState(
+					{
+						[key]: {
+							data: response,
+							isFetching: false,
+							isFetched: true,
+							error: null
+						}
+					},
+					() => {
+						if (onComplete) {
+							const data = reduce(
+								Object.keys(this.state),
+								(result, k) => ({
+									...result,
+									[k]: get(this.state, `${k}.data`)
+								}),
+								{}
+							);
+
+							const manipulatedData = onComplete(data);
+
+							if (manipulatedData) {
+								this.setState(prevState =>
+									reduce(
+										Object.keys(manipulatedData),
+										(result, k) => ({
+											...result,
+											[k]: {
+												...get(prevState, k, {}),
+												data: manipulatedData[k]
+											}
+										}),
+										{}
+									)
+								);
+							}
+						}
 					}
-				});
+				);
 
 				if (reset) {
 					this.timers[key] = setTimeout(() => {

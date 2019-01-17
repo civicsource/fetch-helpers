@@ -355,6 +355,97 @@ describe("Connecting a component to fetch", function() {
 		});
 	});
 
+	describe("when rendering a component with a completion function", function() {
+		beforeEach(function(done) {
+			this.FetchingComponent = connect(() => ({
+				todoList: `http://example.com/api/items/`,
+				addItem: desc => ({
+					newItem: {
+						url: `http://example.com/api/items/`,
+						method: "POST",
+						body: JSON.stringify({ desc }),
+						onComplete: ({ todoList, newItem }) => {
+							if (!todoList || !newItem) return;
+							return { todoList: [...todoList, newItem] };
+						}
+					}
+				})
+			}))(this.NakedComponent);
+
+			this.wrapper = mount(<this.FetchingComponent id={4} />);
+
+			this.requests.pop().resolve({
+				status: 200,
+				statusText: "OK",
+				json: async () => ["do code", "eat food"]
+			});
+
+			setTimeout(done, 10);
+		});
+
+		it("should load the original data", function() {
+			const {
+				todoList: { data }
+			} = this.renderedProps;
+
+			expect(data).to.be.ok;
+			expect(data).to.have.lengthOf(2);
+			expect(data).to.contain("do code");
+			expect(data).to.contain("eat food");
+		});
+
+		it("should set the load status", function() {
+			const { todoList } = this.renderedProps;
+
+			expect(todoList.isFetching).to.be.false;
+			expect(todoList.isFetched).to.be.true;
+			expect(todoList.error).to.not.be.ok;
+		});
+
+		describe("and then calling the lazy function", function() {
+			beforeEach(function(done) {
+				this.renderedProps.addItem("watch tv");
+
+				this.requests.pop().resolve({
+					status: 200,
+					statusText: "OK",
+					json: async () => "Watch TV"
+				});
+
+				setTimeout(done, 10);
+			});
+
+			it("should run the manipulation function on the returned data key", function() {
+				const {
+					todoList: { data }
+				} = this.renderedProps;
+
+				expect(data).to.be.ok;
+				expect(data).to.have.lengthOf(3);
+				expect(data).to.contain("do code");
+				expect(data).to.contain("eat food");
+				expect(data).to.contain("Watch TV");
+			});
+
+			it("should not modify the manipulatd data load status", function() {
+				const { todoList } = this.renderedProps;
+
+				expect(todoList.isFetching).to.be.false;
+				expect(todoList.isFetched).to.be.true;
+				expect(todoList.error).to.not.be.ok;
+			});
+
+			it("should not change the key that was not returned", function() {
+				const { newItem } = this.renderedProps;
+
+				expect(newItem.isFetching).to.be.false;
+				expect(newItem.isFetched).to.be.true;
+				expect(newItem.error).to.not.be.ok;
+				expect(newItem.data).to.equal("Watch TV");
+			});
+		});
+	});
+
 	describe("when rendering a component with a bearer token", function() {
 		beforeEach(function() {
 			this.FetchingComponent = connect(() => ({
