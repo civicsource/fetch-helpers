@@ -728,4 +728,25 @@ describe("Connecting a component to fetch", function() {
 			});
 		});
 	});
+
+	describe("when rendering a component while disabling fetch", function() {
+		beforeEach(function() {
+			this.FetchingComponent = connect(() => ({
+				bananas: "http://example.com/api/bananas/"
+			}))(this.NakedComponent);
+
+			this.wrapper = mount(<this.FetchingComponent disableFetch />);
+		});
+
+		it("should not make a fetch API request", function() {
+			expect(this.requests.length).to.equal(0);
+		});
+
+		it("should not pass status props to the component", function() {
+			expect(this.renderedProps).to.be.ok;
+
+			const { bananaSaveResult } = this.renderedProps;
+			expect(bananaSaveResult).to.not.be.ok;
+		});
+	});
 });

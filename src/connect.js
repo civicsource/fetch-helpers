@@ -10,6 +10,8 @@ const connect = fn => DecoratedComponent =>
 		state = {};
 
 		componentDidMount() {
+			if (this.props.disableFetch) return;
+
 			const itemsToFetch = fn(this.props);
 
 			if (itemsToFetch) {
@@ -21,6 +23,8 @@ const connect = fn => DecoratedComponent =>
 		}
 
 		componentDidUpdate(prevProps) {
+			if (this.props.disableFetch) return;
+
 			const itemsToFetch = fn(this.props);
 
 			if (itemsToFetch) {
