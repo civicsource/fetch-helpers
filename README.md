@@ -68,9 +68,9 @@ Do that at the beginning of the entry point for your app and then you can use `f
 4. [`parseJSON`](#parsejsonresponse)
 5. [`batchFetch`](#batchfetchkeyname-performfetch--maxbatchsize-timeout-)
 
-### `connect(fn, [...keys])`
+### `connect(fn)`
 
-This is a [HOC (higher order component)](https://facebook.github.io/react/docs/higher-order-components.html) that will reduce the amount of boilerplate you need when writing a component that will need to do data fetching on render. In general, you should strive to separate your components into [presentational & container components](https://medium.com/@dan_abramov/smart-and-dumb-components-7ca2f9a7c7d0). In doing this, you can cleanly separate your presentation logic from your data-fetching logic. Here is an example:
+This is a [HOC (higher order component)](https://facebook.github.io/react/docs/higher-order-components.html) heavily inspired by [react-refetch](https://github.com/heroku/react-refetch) tweaked to work more efficiently with how we work with data [@ CivicSource](https://github.com/civicsource/). Here is an example:
 
 ```js
 const UserProfile = ({ user }) => (
@@ -86,22 +86,22 @@ That might end up looking something like this:
 
 ```js
 // add some more props to show loading statuses
-const UserProfile = ({ user, isLoading, isLoaded, error }) => {
+const UserProfile = ({ user, isFetching, isFetched, error }) => {
 	if (error) {
 		return <span>Error loading user: {error}</span>;
 	}
 
-	if (isLoading && !isLoaded) {
+	if (isFetching && !isFetched) {
 		return <span>Loading...</span>;
 	}
 
-	if (!isLoaded) {
+	if (!isFetched) {
 		return null;
 	}
 
 	// we may still need to show a loading indicator if the user is loaded
 	// but we are loading more data for the user, e.g. "refreshing the user"
-	const loadingIndicator = isLoading ? <span>Loading...</span> : null;
+	const loadingIndicator = isFetching ? <span>Loading...</span> : null;
 	return <span title={user.username}>{user.email} {loadingIndicator}</span>;
 };
 
@@ -110,8 +110,8 @@ export default class UserContainer extends Component {
 		super(props);
 
 		this.state = {
-			isLoading: false,
-			isLoaded: false,
+			isFetching: false,
+			isFetched: false,
 			error: null
 		};
 	}
@@ -122,7 +122,7 @@ export default class UserContainer extends Component {
 
 	fetchUser = async () => {
 		this.setState({
-			isLoading: true,
+			isFetching: true,
 			error: null
 		});
 
@@ -135,13 +135,13 @@ export default class UserContainer extends Component {
 			response = await parseJSON(response);
 
 			this.setState({
-				isLoaded: true,
-				isLoading: false,
+				isFetched: true,
+				isFetching: false,
 				user: response
 			});
 		} catch (ex) {
 			this.setState({
-				isLoading: false,
+				isFetching: false,
 				error: ex.message
 			});
 		}
@@ -171,7 +171,7 @@ const UserProfileFetcher = connect(({ username }) => ({
 export default UserProfileFetcher;
 ```
 
-The first argument is a function that takes the current props and should return a keyed object describing how to fetch the requested data. `connect` will generate the `isLoading`, `isLoaded`, & `error` statuses and pass that down to the wrapped component under the `user` prop.
+The first argument is a function that takes the current props and should return a keyed object describing how to fetch the requested data. `connect` will generate the `isFetching`, `isFetched`, & `error` statuses and pass that down to the wrapped component under the `user` prop.
 
 By default, it will only run the fetch when the component is initially mounted. Optionally, if your component takes more `props` and you want to fetch on certain prop updates (which is usually the case), you can pass a list of keys to `connect`:
 
@@ -219,6 +219,48 @@ const UserProfileFetcher = connect(({ username }) => ({
 	}
 }))(UserProfile);
 ```
+
+#### Lazy Functions
+
+You can pass a function to `connect` in order to bind that function as a `prop` to the component to be invoked later. You can use this for lazy loading data and/or responding with user input to `POST` data to the server for example:
+
+```js
+connect(({ username }) => ({
+	user:{
+		url: `http://example.com/api/${username}`,
+		bearerToken: "poop",
+		keys: ["username"]
+	},
+	saveUser: (birthday) => ({
+		userSaveResult: {
+			url: `http://example.com/api/${username}`,
+			method: "POST",
+			body: JSON.stringify({ birthday })
+		}
+	})
+}))(UserProfile);
+```
+
+This will pass a `saveUser` function to the `UserProfile` component which can be invoked in response to a user action. The `userSaveResult` prop will also be passed down with the standard `isFetching`, `isFetched`, & `error` fields.
+
+#### Reset Fetch Status
+
+You can add a timer to reset the fetch status of an item. This is useful for clearing an item-saved indicator for example:
+
+```js
+connect(({ username }) => ({
+	saveUser: (birthday) => ({
+		userSaveResult: {
+			url: `http://example.com/api/${username}`,
+			method: "POST",
+			body: JSON.stringify({ birthday }),
+			reset: 2000
+		}
+	})
+}))(UserProfile);
+```
+
+After `saveUser` has been invoked with a successful response, the `userSaveResult` prop will be cleared after 2 seconds.
 
 #### `bearerToken`
 
