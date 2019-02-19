@@ -126,6 +126,9 @@ const connect = fn => DecoratedComponent =>
 
 					if (onData) {
 						response = onData(response);
+						if (response.then) {
+							response = await handleAsyncOnDatas(response);
+						}
 					}
 				} else {
 					// for 204 No Content, just return null data
@@ -220,5 +223,17 @@ export function mapParams(paramKeys, params) {
 
 	return result;
 }
+
+const handleAsyncOnDatas = async response => {
+	try {
+		response = await response;
+		if (response.then) {
+			response = await handleAsyncOnDatas(response);
+		}
+		return response;
+	} catch (ex) {
+		throw ex;
+	}
+};
 
 export default connect;
