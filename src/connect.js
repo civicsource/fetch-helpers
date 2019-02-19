@@ -225,15 +225,11 @@ export function mapParams(paramKeys, params) {
 }
 
 const handleAsyncOnDatas = async response => {
-	try {
-		response = await response;
-		if (response.then) {
-			response = await handleAsyncOnDatas(response);
-		}
-		return response;
-	} catch (ex) {
-		throw ex;
+	response = await response;
+	if (response.then) {
+		response = await handleAsyncOnDatas(response);
 	}
+	return response;
 };
 
 export default connect;
