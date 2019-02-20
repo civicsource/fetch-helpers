@@ -355,6 +355,126 @@ describe("Connecting a component to fetch", function() {
 		});
 	});
 
+	describe("when rendering a component with an async data manipulation function", function() {
+		beforeEach(function(done) {
+			this.FetchingComponent = connect(({ id }) => ({
+				bananas: {
+					url: `http://example.com/api/bananas/${id}`,
+					onData: bananas =>
+						new Promise(resolve =>
+							resolve(bananas.map(str => str.replace(" banana", "")))
+						)
+				}
+			}))(this.NakedComponent);
+
+			this.wrapper = mount(<this.FetchingComponent id={4} />);
+
+			this.requests.pop().resolve({
+				status: 200,
+				statusText: "OK",
+				json: async () => ["ripe banana", "green banana"]
+			});
+
+			setTimeout(done, 10);
+		});
+
+		it("should await manipulation of the data before passing to the component", function() {
+			const {
+				bananas: { data }
+			} = this.renderedProps;
+
+			expect(data).to.be.ok;
+			expect(data).to.have.lengthOf(2);
+			expect(data).to.contain("ripe");
+			expect(data).to.contain("green");
+		});
+	});
+
+	describe("when rendering a component with an async data manipulation function that returns a promise", function() {
+		beforeEach(function(done) {
+			this.FetchingComponent = connect(({ id }) => ({
+				bananas: {
+					url: `http://example.com/api/bananas/${id}`,
+					onData: bananas =>
+						new Promise(resolve =>
+							resolve(
+								new Promise(resolve =>
+									resolve(bananas.map(str => str.replace(" banana", "")))
+								)
+							)
+						)
+				}
+			}))(this.NakedComponent);
+
+			this.wrapper = mount(<this.FetchingComponent id={4} />);
+
+			this.requests.pop().resolve({
+				status: 200,
+				statusText: "OK",
+				json: async () => ["ripe banana", "green banana"]
+			});
+
+			setTimeout(done, 10);
+		});
+
+		it("should await manipulation of the data before passing to the component", function() {
+			const {
+				bananas: { data }
+			} = this.renderedProps;
+
+			expect(data).to.be.ok;
+			expect(data).to.have.lengthOf(2);
+			expect(data).to.contain("ripe");
+			expect(data).to.contain("green");
+		});
+	});
+
+	describe("when rendering a component with an async data manipulation function that throws an exception", function() {
+		beforeEach(function(done) {
+			this.FetchingComponent = connect(({ id }) => ({
+				bananas: {
+					url: `http://example.com/api/bananas/${id}`,
+					onData: () => {
+						return new Promise(resolve =>
+							resolve(
+								new Promise(resolve =>
+									resolve(
+										new Promise(() => {
+											throw { message: "wow you messed up" };
+										})
+									)
+								)
+							)
+						);
+					}
+				}
+			}))(this.NakedComponent);
+
+			this.wrapper = mount(<this.FetchingComponent id={4} />);
+
+			this.requests.pop().resolve({
+				status: 200,
+				statusText: "OK",
+				json: async () => ["ripe banana", "green banana"]
+			});
+
+			setTimeout(done, 10);
+		});
+
+		it("should await manipulation of the data before passing to the component", function() {
+			expect(this.renderedProps).to.be.ok;
+
+			const { bananas } = this.renderedProps;
+			expect(bananas).to.be.ok;
+
+			expect(bananas.isFetching).to.be.false;
+			expect(bananas.isFetched).to.be.false;
+			expect(bananas.error).to.equal("wow you messed up");
+
+			expect(bananas.data).to.not.be.ok;
+		});
+	});
+
 	describe("when rendering a component with a completion function", function() {
 		beforeEach(function(done) {
 			this.FetchingComponent = connect(() => ({
