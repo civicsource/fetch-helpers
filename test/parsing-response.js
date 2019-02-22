@@ -57,6 +57,21 @@ describe("Parsing Responses", function() {
 			});
 		}
 
+		describe("with no error message or status text", function() {
+			beforeEach(function() {
+				this.resolve({ status: 404 });
+			});
+
+			shouldRejectWithError(404);
+
+			it("should use a generic error message", function(done) {
+				this.result.catch(err => {
+					expect(err.message).to.equal("Request failed with status code 404");
+					done();
+				});
+			});
+		});
+
 		describe("with an error message", function() {
 			beforeEach(function() {
 				this.resolve({

@@ -117,7 +117,13 @@ describe("Connecting a component to fetch", function() {
 
 				expect(bananas.isFetching).to.be.false;
 				expect(bananas.isFetched).to.be.false;
-				expect(bananas.error).to.equal("Not today, buddy");
+
+				expect(bananas.error).to.be.ok;
+				expect(bananas.error).to.be.an("error");
+
+				expect(bananas.error.message).to.equal("Not today, buddy");
+				expect(bananas.error.response).to.be.ok;
+				expect(bananas.error.response.status).to.equal(500);
 
 				expect(bananas.data).to.not.be.ok;
 			});
@@ -280,7 +286,13 @@ describe("Connecting a component to fetch", function() {
 
 				expect(bananas.isFetching).to.be.false;
 				expect(bananas.isFetched).to.be.false;
-				expect(bananas.error).to.equal("Not today, buddy");
+
+				expect(bananas.error).to.be.ok;
+				expect(bananas.error).to.be.an("error");
+
+				expect(bananas.error.message).to.equal("Not today, buddy");
+				expect(bananas.error.response).to.be.ok;
+				expect(bananas.error.response.status).to.equal(500);
 
 				expect(bananas.data).to.not.be.ok;
 			});
@@ -440,7 +452,7 @@ describe("Connecting a component to fetch", function() {
 								new Promise(resolve =>
 									resolve(
 										new Promise(() => {
-											throw { message: "wow you messed up" };
+											throw new Error("wow you messed up");
 										})
 									)
 								)
@@ -469,7 +481,12 @@ describe("Connecting a component to fetch", function() {
 
 			expect(bananas.isFetching).to.be.false;
 			expect(bananas.isFetched).to.be.false;
-			expect(bananas.error).to.equal("wow you messed up");
+
+			expect(bananas.error).to.be.ok;
+			expect(bananas.error).to.be.an("error");
+
+			expect(bananas.error.message).to.equal("wow you messed up");
+			expect(bananas.error.response).to.not.be.ok;
 
 			expect(bananas.data).to.not.be.ok;
 		});

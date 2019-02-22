@@ -197,7 +197,7 @@ const connect = fn => DecoratedComponent =>
 						data: prevState[key].data,
 						isFetching: false,
 						isFetched: prevState[key].isFetched,
-						error: ex.message
+						error: ex
 					}
 				}));
 			}
